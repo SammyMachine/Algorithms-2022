@@ -2,6 +2,8 @@
 
 package lesson1
 
+import java.io.File
+
 /**
  * Сортировка времён
  *
@@ -33,7 +35,31 @@ package lesson1
  * В случае обнаружения неверного формата файла бросить любое исключение.
  */
 fun sortTimes(inputName: String, outputName: String) {
-    TODO()
+    val outputFile = File(outputName).bufferedWriter()
+    val list = mutableListOf<Pair<Int, String>>()
+    for (line in File(inputName).readLines()) {
+        if (!line.matches(Regex("""((0[0-9]|1[0-2]):[0-5][0-9]:[0-5][0-9] (AM|PM))""")))
+            throw java.lang.IllegalArgumentException("Wrong input data")
+        val newLine = line.replace(Regex(""" (AM|PM)"""), "")
+        val partsOfDate = newLine.split(":")
+        var timeInSeconds = 0
+        if (line.contains("AM")) {
+            if (partsOfDate[0] != "12") timeInSeconds = partsOfDate[0].toInt() * 60 * 60
+        } else {
+            if (partsOfDate[0] != "12") timeInSeconds += (partsOfDate[0].toInt() + 12) * 60 * 60
+            else timeInSeconds = partsOfDate[0].toInt() * 60 * 60
+        }
+        timeInSeconds += partsOfDate[1].toInt() * 60
+        timeInSeconds += partsOfDate[2].toInt()
+        list.add(Pair(timeInSeconds, line))
+    }
+    list.sortBy { it.first }
+    for (pair in list) {
+        outputFile.write(pair.second)
+        if (pair != list.last())
+            outputFile.newLine()
+    }
+    outputFile.close()
 }
 
 /**
