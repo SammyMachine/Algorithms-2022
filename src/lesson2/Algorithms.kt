@@ -94,8 +94,21 @@ fun josephTask(menNumber: Int, choiceInterval: Int): Int {
  * Если имеется несколько самых длинных общих подстрок одной длины,
  * вернуть ту из них, которая встречается раньше в строке first.
  */
+// Ресурсоемкость O(m*n) Трудоемкость O(m*n), где m и n - длины строк
 fun longestCommonSubstring(first: String, second: String): String {
-    TODO()
+    var maxLength = 0
+    var maxIndex = 0
+    val matrix = Array(first.length + 1) { IntArray(second.length + 1) { 0 } }
+    for (i in matrix.indices)
+        for (j in matrix[i].indices) {
+            if (i != 0 && j != 0)
+                if (first[i - 1] == second[j - 1]) matrix[i][j] = matrix[i - 1][j - 1] + 1
+            if (matrix[i][j] > maxLength) {
+                maxLength = matrix[i][j]
+                maxIndex = i
+            }
+        }
+    return first.substring(maxIndex - maxLength, maxIndex)
 }
 
 /**
@@ -108,6 +121,24 @@ fun longestCommonSubstring(first: String, second: String): String {
  * Справка: простым считается число, которое делится нацело только на 1 и на себя.
  * Единица простым числом не считается.
  */
+// Ресурсоемкость O(n) Трудоемкость O(n*log(log(n)))
 fun calcPrimesNumber(limit: Int): Int {
-    TODO()
+    var counter = 0
+    if (limit > 1) {
+        val numbers: Array<Boolean> = Array(limit + 1) { true }
+        numbers[0] = false
+        numbers[1] = false
+        for (i in 2 until numbers.size) {
+            if (numbers[i]) {
+                var j = 2
+                while (i * j < numbers.size) {
+                    if (numbers[i * j]) numbers[i * j] = false
+                    j++
+                }
+            }
+        }
+        for (i in numbers.indices)
+            if (numbers[i]) counter++
+    }
+    return counter
 }

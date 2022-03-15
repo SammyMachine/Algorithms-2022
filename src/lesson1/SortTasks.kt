@@ -35,31 +35,7 @@ import java.io.File
  * В случае обнаружения неверного формата файла бросить любое исключение.
  */
 fun sortTimes(inputName: String, outputName: String) {
-    val outputFile = File(outputName).bufferedWriter()
-    val list = mutableListOf<Pair<Int, String>>()
-    for (line in File(inputName).readLines()) {
-        if (!line.matches(Regex("""((0[0-9]|1[0-2]):[0-5][0-9]:[0-5][0-9] (AM|PM))""")))
-            throw java.lang.IllegalArgumentException("Wrong input data")
-        val newLine = line.replace(Regex(""" (AM|PM)"""), "")
-        val partsOfDate = newLine.split(":")
-        var timeInSeconds = 0
-        if (line.contains("AM")) {
-            if (partsOfDate[0] != "12") timeInSeconds = partsOfDate[0].toInt() * 60 * 60
-        } else {
-            if (partsOfDate[0] != "12") timeInSeconds += (partsOfDate[0].toInt() + 12) * 60 * 60
-            else timeInSeconds = partsOfDate[0].toInt() * 60 * 60
-        }
-        timeInSeconds += partsOfDate[1].toInt() * 60
-        timeInSeconds += partsOfDate[2].toInt()
-        list.add(Pair(timeInSeconds, line))
-    }
-    list.sortBy { it.first }
-    for (pair in list) {
-        outputFile.write(pair.second)
-        if (pair != list.last())
-            outputFile.newLine()
-    }
-    outputFile.close()
+    TODO()
 }
 
 /**
@@ -88,8 +64,26 @@ fun sortTimes(inputName: String, outputName: String) {
  *
  * В случае обнаружения неверного формата файла бросить любое исключение.
  */
+// Ресурсоемкость O(n) Трудоемкость O(n*log(n))
 fun sortAddresses(inputName: String, outputName: String) {
-    TODO()
+    val map = mutableMapOf<String, MutableList<String>>()
+    for (line in File(inputName).readLines()) {
+        if (!line.matches(Regex("""([А-яёЁ]+ [А-яёЁ]+ - [А-яёЁ].+ \d+)""")))
+            throw java.lang.IllegalArgumentException("Wrong input data")
+        val partsOfLine = line.split(" - ")
+        if (map.containsKey(partsOfLine[1]))
+            map[partsOfLine[1]]!!.add(partsOfLine[0])
+        else
+            map[partsOfLine[1]] = mutableListOf(partsOfLine[0])
+    }
+    val sortedMap = map.toSortedMap(compareBy<String> { it.split(" ")[0] }.thenBy { it.split(" ")[1].toInt() })
+    sortedMap.map { it.value.sort() }
+    val outputFile = File(outputName).bufferedWriter()
+    for ((address, persons) in sortedMap) {
+        outputFile.write("$address - ${persons.joinToString(", ")}")
+        outputFile.newLine()
+    }
+    outputFile.close()
 }
 
 /**
@@ -122,8 +116,18 @@ fun sortAddresses(inputName: String, outputName: String) {
  * 99.5
  * 121.3
  */
+// Как я понял, простая сортировка, например в list здесь неэффективна. Помогло избавиться от double и перейти к int.
+// Ресурсоемкость O(n) Трудоемкость O(n)
 fun sortTemperatures(inputName: String, outputName: String) {
-    TODO()
+    val minTempForSorting = 2730
+    val maxTempForSorting = 5000 + minTempForSorting
+    val temp = File(inputName).readLines().map { (it.toDouble() * 10).toInt() + minTempForSorting }.toIntArray()
+    val outputFile = File(outputName).bufferedWriter()
+    countingSort(temp, maxTempForSorting).forEach {
+        outputFile.write("${(it - minTempForSorting).toDouble() / 10}")
+        outputFile.newLine()
+    }
+    outputFile.close()
 }
 
 /**
