@@ -119,6 +119,29 @@ class KtBinarySearchTree<T : Comparable<T>> : AbstractMutableSet<T>(), Checkable
         return true
     }
 
+    private fun removeWithoutValue(node: Node<T>): Boolean {
+        when {
+            node.left == null -> replace(node, node.right)
+            node.right == null -> replace(node, node.left)
+            else -> {
+                var checkableNode = node.right
+                while (checkableNode!!.left != null) {
+                    checkableNode = checkableNode.left!!
+                }
+                if (checkableNode.parent != node) {
+                    replace(checkableNode, checkableNode.right)
+                    checkableNode.right = node.right
+                    checkableNode.right!!.parent = checkableNode
+                }
+                replace(node, checkableNode)
+                checkableNode.left = node.left
+                checkableNode.left!!.parent = checkableNode
+            }
+        }
+        size--
+        return true
+    }
+
     override fun comparator(): Comparator<in T>? =
         null
 
@@ -193,7 +216,7 @@ class KtBinarySearchTree<T : Comparable<T>> : AbstractMutableSet<T>(), Checkable
         // Ресурсоемкость O(1), трудоемкость O(log(n))
         override fun remove() {
             if (next == null) throw IllegalStateException()
-            remove(next!!.value)
+            removeWithoutValue(next!!)
             next = null
         }
 
