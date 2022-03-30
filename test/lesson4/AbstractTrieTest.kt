@@ -109,6 +109,17 @@ abstract class AbstractTrieTest {
                 trieIter.next()
             }
             println("All clear!")
+
+            val set = create()
+            assertFalse(
+                set.iterator().hasNext(),
+                "Iterator of an empty tree should not have any next elements."
+            )
+            val setIter = set.iterator()
+            assertFailsWith<NoSuchElementException>("Something was supposedly returned after the elements ended") {
+                setIter.next()
+            }
+            println("All clear!")
         }
     }
 
@@ -170,6 +181,30 @@ abstract class AbstractTrieTest {
                 )
             }
             println("All clear!")
+        }
+        val stringList = mutableListOf<String>()
+        val controlSet = mutableSetOf<String>()
+        val set = create()
+        for (i in 0..30) {
+            val string = random.nextString("abcdefghijkl", 1, 15)
+            stringList.add(string)
+            controlSet.add(string)
+            set.add(string)
+        }
+        for (i in 0..15) {
+            controlSet.remove(stringList[i])
+            val iterator = set.iterator()
+            while (iterator.hasNext()) {
+                val element = iterator.next()
+                if (element == stringList[i]) {
+                    println("Control set: $controlSet")
+                    println("Removing element \"$element\" from trie set through the iterator...")
+                    iterator.remove()
+                    assertEquals(controlSet, set)
+                    println("All clear!")
+                    break
+                }
+            }
         }
     }
 

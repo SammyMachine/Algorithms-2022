@@ -97,29 +97,12 @@ class KtBinarySearchTree<T : Comparable<T>> : AbstractMutableSet<T>(), Checkable
     override fun remove(element: T): Boolean {
         val node = find(element) ?: return false
         if (node.value != element) return false
-        when {
-            node.left == null -> replace(node, node.right)
-            node.right == null -> replace(node, node.left)
-            else -> {
-                var checkableNode = node.right
-                while (checkableNode!!.left != null) {
-                    checkableNode = checkableNode.left!!
-                }
-                if (checkableNode.parent != node) {
-                    replace(checkableNode, checkableNode.right)
-                    checkableNode.right = node.right
-                    checkableNode.right!!.parent = checkableNode
-                }
-                replace(node, checkableNode)
-                checkableNode.left = node.left
-                checkableNode.left!!.parent = checkableNode
-            }
-        }
+        delete(node)
         size--
         return true
     }
 
-    private fun removeWithoutValue(node: Node<T>): Boolean {
+    private fun delete(node: Node<T>) {
         when {
             node.left == null -> replace(node, node.right)
             node.right == null -> replace(node, node.left)
@@ -138,8 +121,6 @@ class KtBinarySearchTree<T : Comparable<T>> : AbstractMutableSet<T>(), Checkable
                 checkableNode.left!!.parent = checkableNode
             }
         }
-        size--
-        return true
     }
 
     override fun comparator(): Comparator<in T>? =
@@ -216,7 +197,8 @@ class KtBinarySearchTree<T : Comparable<T>> : AbstractMutableSet<T>(), Checkable
         // Ресурсоемкость O(1), трудоемкость O(log(n))
         override fun remove() {
             if (next == null) throw IllegalStateException()
-            removeWithoutValue(next!!)
+            delete(next!!)
+            size--
             next = null
         }
 
