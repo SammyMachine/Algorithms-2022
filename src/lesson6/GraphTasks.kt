@@ -2,6 +2,9 @@
 
 package lesson6
 
+import lesson6.impl.GraphBuilder
+import java.util.*
+
 /**
  * Эйлеров цикл.
  * Средняя
@@ -60,8 +63,28 @@ fun Graph.findEulerLoop(): List<Graph.Edge> {
  * |
  * J ------------ K
  */
+// Ресурсоемкость O(V), трудоемкость O(E+V)
 fun Graph.minimumSpanningTree(): Graph {
-    TODO()
+    if (vertices.size <= 2) return this
+    val visitedVertices = mutableSetOf<Graph.Vertex>()
+    val stackOfUnvisitedVertices = ArrayDeque<Graph.Vertex>()
+    visitedVertices.add(vertices.first())
+    stackOfUnvisitedVertices.push(vertices.first())
+    val graph = GraphBuilder()
+    while (stackOfUnvisitedVertices.isNotEmpty()) {
+        val currentVertex = stackOfUnvisitedVertices.pop()
+        val neighbours = getNeighbors(currentVertex)
+        for (vertex in neighbours) {
+            if (!visitedVertices.contains(vertex)) {
+                graph.addVertex(currentVertex.toString())
+                graph.addVertex(vertex.toString())
+                graph.addConnection(currentVertex, vertex)
+                visitedVertices.add(vertex)
+                stackOfUnvisitedVertices.push(vertex)
+            }
+        }
+    }
+    return graph.build()
 }
 
 /**
@@ -112,8 +135,20 @@ fun Graph.largestIndependentVertexSet(): Set<Graph.Vertex> {
  *
  * Ответ: A, E, J, K, D, C, H, G, B, F, I
  */
+// Ресурсоемкость O(V), трудоемкость O(E+V)
 fun Graph.longestSimplePath(): Path {
-    TODO()
+    val pathsStack = ArrayDeque<Path>()
+    var longestSimplePath = Path()
+    for (vertex in vertices)
+        pathsStack.push(Path(vertex))
+    while (pathsStack.isNotEmpty()) {
+        val currentPath = pathsStack.pop()
+        if (longestSimplePath.length < currentPath.length) longestSimplePath = currentPath
+        val neighbours = getNeighbors(currentPath.vertices[currentPath.length])
+        for (vertex in neighbours)
+            if (vertex !in currentPath) pathsStack.push(Path(currentPath, this, vertex))
+    }
+    return longestSimplePath
 }
 
 /**

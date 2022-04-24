@@ -12,6 +12,8 @@ class KtOpenAddressingSet<T : Any>(private val bits: Int) : AbstractMutableSet<T
 
     private val storage = Array<Any?>(capacity) { null }
 
+    private object DELETED
+
     override var size: Int = 0
 
     /**
@@ -51,7 +53,7 @@ class KtOpenAddressingSet<T : Any>(private val bits: Int) : AbstractMutableSet<T
         val startingIndex = element.startingIndex()
         var index = startingIndex
         var current = storage[index]
-        while (current != null) {
+        while (current != null && current != DELETED) {
             if (current == element) {
                 return false
             }
@@ -75,8 +77,20 @@ class KtOpenAddressingSet<T : Any>(private val bits: Int) : AbstractMutableSet<T
      *
      * Средняя
      */
+    // Ресурсоемкость O(1), трудоемкость O(n)
     override fun remove(element: T): Boolean {
-        TODO("not implemented")
+        var index = element.startingIndex()
+        var current = storage[index]
+        while (current != null) {
+            if (current == element) {
+                storage[index] = DELETED
+                size--
+                return true
+            }
+            index = (index + 1) % capacity
+            current = storage[index]
+        }
+        return false
     }
 
     /**
@@ -89,7 +103,37 @@ class KtOpenAddressingSet<T : Any>(private val bits: Int) : AbstractMutableSet<T
      *
      * Средняя (сложная, если поддержан и remove тоже)
      */
-    override fun iterator(): MutableIterator<T> {
-        TODO("not implemented")
+    override fun iterator(): MutableIterator<T> = TableIterator()
+
+    inner class TableIterator : MutableIterator<T> {
+
+        var amountOfElements = 0
+        var index = 0
+        private var next: Any? = null
+
+        // Ресурсоемкость O(1), трудоемкость O(1)
+        override fun hasNext(): Boolean = size > amountOfElements
+
+        // Ресурсоемкость O(1), трудоемкость O(n)
+        override fun next(): T {
+            if (!hasNext()) throw NoSuchElementException()
+            while (storage[index] == null || storage[index] == DELETED) {
+                index++
+            }
+            next = storage[index]
+            amountOfElements++
+            index++
+            return next as T
+        }
+
+        // Ресурсоемкость O(1), трудоемкость O(1)
+        override fun remove() {
+            if (next == null) throw IllegalStateException()
+            size--
+            amountOfElements--
+            storage[index - 1] = DELETED
+            next = null
+        }
+
     }
 }

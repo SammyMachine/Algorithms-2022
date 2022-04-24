@@ -86,16 +86,19 @@ class KtTrie : AbstractMutableSet<String>(), MutableSet<String> {
                 else initNodes(entry.value, string + entry.key)
         }
 
+        // Ресурсоемкость O(1), трудоемкость O(1)
         override fun hasNext(): Boolean = stack.isNotEmpty()
 
         private var next: String = ""
 
+        // Ресурсоемкость O(1), трудоемкость O(1)
         override fun next(): String {
             if (!hasNext()) throw NoSuchElementException()
             next = stack.pop()
             return next
         }
 
+        // Ресурсоемкость O(1), трудоемкость O(log(n))
         override fun remove() {
             if (next == "") throw IllegalStateException()
             remove(next)
