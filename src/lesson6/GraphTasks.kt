@@ -135,7 +135,7 @@ fun Graph.largestIndependentVertexSet(): Set<Graph.Vertex> {
  *
  * Ответ: A, E, J, K, D, C, H, G, B, F, I
  */
-// Ресурсоемкость O(V), трудоемкость O(E+V)
+// Ресурсоемкость O(n^2), трудоемкость O(n!)
 fun Graph.longestSimplePath(): Path {
     val pathsStack = ArrayDeque<Path>()
     var longestSimplePath = Path()

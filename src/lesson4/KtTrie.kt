@@ -74,35 +74,58 @@ class KtTrie : AbstractMutableSet<String>(), MutableSet<String> {
 
     inner class TrieIterator internal constructor() : MutableIterator<String> {
 
-        private val stack = ArrayDeque<String>()
+        private val stack: ArrayDeque<MutableIterator<Map.Entry<Char, Node>>> = ArrayDeque()
+        private val stringBuilder = StringBuilder()
+        private var nextWord = ""
+        private var counter = 0
 
         init {
-            initNodes(root, "")
+            initStack()
         }
 
-        private fun initNodes(node: Node, string: String) {
-            for (entry in node.children)
-                if (entry.key == 0.toChar()) stack.push(string)
-                else initNodes(entry.value, string + entry.key)
-        }
+        private fun initStack() = stack.push(root.children.entries.iterator())
 
         // Ресурсоемкость O(1), трудоемкость O(1)
-        override fun hasNext(): Boolean = stack.isNotEmpty()
+        override fun hasNext(): Boolean = size > counter
 
-        private var next: String = ""
-
-        // Ресурсоемкость O(1), трудоемкость O(1)
+        // Ресурсоемкость O(h), трудоемкость O(n), где h - высота дерева
         override fun next(): String {
             if (!hasNext()) throw NoSuchElementException()
-            next = stack.pop()
-            return next
+            findNext()
+            return nextWord
         }
 
-        // Ресурсоемкость O(1), трудоемкость O(log(n))
+        private fun findNext() {
+            var checkerForStack = stack.peek()
+            while (checkerForStack != null) {
+                while (checkerForStack.hasNext()) {
+                    val entry = checkerForStack.next()
+                    if (entry.key == 0.toChar()) {
+                        nextWord = stringBuilder.toString()
+                        counter++
+                        return
+                    }
+                    checkerForStack = entry.value.children.entries.iterator()
+                    stack.push(checkerForStack)
+                    stringBuilder.append(entry.key)
+                }
+                stack.pop()
+                if (stringBuilder.isNotEmpty())
+                    stringBuilder.deleteCharAt(stringBuilder.length - 1)
+                checkerForStack = stack.peek()
+            }
+        }
+
+        // Ресурсоемкость O(1), трудоемкость O(1)
         override fun remove() {
-            if (next == "") throw IllegalStateException()
-            remove(next)
-            next = ""
+            if (nextWord == "") throw IllegalStateException()
+            if (stack.peek() != null) {
+                stack.peek().remove()
+                nextWord = ""
+                size--
+                counter--
+
+            }
         }
     }
 
