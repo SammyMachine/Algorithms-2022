@@ -145,7 +145,6 @@ fun Graph.largestIndependentVertexSet(): Set<Graph.Vertex> {
 // Не знаю как сформулировать по другому
 fun Graph.longestSimplePath(): Path {
     val pathsStack = ArrayDeque<Path>()
-    var c = 0
     var longestSimplePath = Path()
     for (vertex in vertices)
         pathsStack.push(Path(vertex))
