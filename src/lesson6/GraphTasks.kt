@@ -135,18 +135,28 @@ fun Graph.largestIndependentVertexSet(): Set<Graph.Vertex> {
  *
  * Ответ: A, E, J, K, D, C, H, G, B, F, I
  */
-// Ресурсоемкость O(n^2), трудоемкость O(n!)
+// Ресурсоемкость O(n!), трудоемкость O(n!)
+// Про ресурсоемкость
+// В худшем случае у нас полносвязный граф
+// Для каждой вершины в изначальном pathsStack мы добавляем все вершины в качестве соседей
+// И количество путей увеличивается на количество вершин без учета посещенных
+// И так происходит до тех пор, пока у нас не будет выдан самый длинный путь
+// Если бы мы не учитывали посещенные вершины, то сложность была бы степенная
+// Не знаю как сформулировать по другому
 fun Graph.longestSimplePath(): Path {
     val pathsStack = ArrayDeque<Path>()
+    var c = 0
     var longestSimplePath = Path()
     for (vertex in vertices)
         pathsStack.push(Path(vertex))
+
     while (pathsStack.isNotEmpty()) {
         val currentPath = pathsStack.pop()
         if (longestSimplePath.length < currentPath.length) longestSimplePath = currentPath
         val neighbours = getNeighbors(currentPath.vertices[currentPath.length])
         for (vertex in neighbours)
-            if (vertex !in currentPath) pathsStack.push(Path(currentPath, this, vertex))
+            if (vertex !in currentPath)
+                pathsStack.push(Path(currentPath, this, vertex))
     }
     return longestSimplePath
 }
